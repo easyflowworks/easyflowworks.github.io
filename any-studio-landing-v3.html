@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Any. Studio — Everyone deserves superpowers.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #08080a;
+    --surface: #121216;
+    --surface-hover: #1a1a20;
+    --border: #252530;
+    --text-primary: #f0eff2;
+    --text-secondary: #888790;
+    --text-tertiary: #555460;
+
+    --c-pm: oklch(0.72 0.17 275);
+    --c-eng: oklch(0.72 0.17 155);
+    --c-design: oklch(0.72 0.17 338);
+    --c-sales: oklch(0.72 0.17 68);
+    --c-hr: oklch(0.72 0.17 22);
+    --c-creator: oklch(0.72 0.17 205);
+    --c-research: oklch(0.72 0.17 118);
+    --c-you: oklch(0.72 0.12 55);
+
+    --font-display: 'Bricolage Grotesque', sans-serif;
+    --font-body: 'Figtree', sans-serif;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ===== NAV ===== */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px;
+    background: rgba(8,8,10,0.82);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(37,37,48,0.5);
+  }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-weight: 800; font-size: 1.4rem;
+    letter-spacing: -0.04em;
+    display: flex; align-items: baseline; gap: 0;
+  }
+  .nav-logo .x-letter {
+    display: inline-block;
+    position: relative;
+  }
+  .nav-logo .dot {
+    display: inline-block;
+    width: 7px; height: 7px; border-radius: 50%;
+    margin-left: 2px; margin-right: 6px;
+    vertical-align: middle;
+    background: var(--c-eng);
+    animation: dotCycle 5s ease-in-out infinite;
+  }
+  @keyframes dotCycle {
+    0%, 100% { background: var(--c-eng); }
+    14% { background: var(--c-pm); }
+    28% { background: var(--c-design); }
+    42% { background: var(--c-sales); }
+    56% { background: var(--c-hr); }
+    70% { background: var(--c-creator); }
+    84% { background: var(--c-research); }
+  }
+  .nav-links { display: flex; gap: 24px; align-items: center; }
+  .nav-links a {
+    font-size: 0.875rem; font-weight: 500;
+    color: var(--text-secondary); text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text-primary); }
+  .nav-cta {
+    background: var(--text-primary) !important;
+    color: var(--bg) !important;
+    padding: 8px 18px !important;
+    border-radius: 8px;
+    font-weight: 600 !important;
+    transition: opacity 0.2s !important;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ===== HERO ===== */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative;
+  }
+
+  /* Ambient glow */
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -10%; left: 50%; transform: translateX(-50%);
+    width: 900px; height: 700px;
+    background:
+      radial-gradient(ellipse 300px 250px at 30% 40%, oklch(0.3 0.1 275 / 0.18), transparent),
+      radial-gradient(ellipse 250px 200px at 70% 35%, oklch(0.3 0.1 155 / 0.15), transparent),
+      radial-gradient(ellipse 200px 250px at 50% 60%, oklch(0.3 0.1 338 / 0.12), transparent),
+      radial-gradient(ellipse 180px 180px at 25% 70%, oklch(0.3 0.1 68 / 0.1), transparent),
+      radial-gradient(ellipse 200px 200px at 75% 65%, oklch(0.3 0.1 205 / 0.1), transparent);
+    filter: blur(60px);
+    pointer-events: none;
+    animation: ambientDrift 12s ease-in-out infinite alternate;
+  }
+  @keyframes ambientDrift {
+    0% { transform: translateX(-50%) scale(1) rotate(0deg); }
+    100% { transform: translateX(-48%) scale(1.05) rotate(2deg); }
+  }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 18px;
+    border: 1px solid var(--border); border-radius: 100px;
+    font-size: 0.8rem; color: var(--text-secondary);
+    margin-bottom: 36px; letter-spacing: 0.02em;
+    position: relative; z-index: 2;
+    opacity: 0; animation: fadeUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
+  }
+
+  /* The X. rotation headline */
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(3.2rem, 7vw, 6rem);
+    line-height: 1.05; letter-spacing: -0.045em;
+    margin-bottom: 28px;
+    position: relative; z-index: 2;
+    opacity: 0; animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.4s forwards;
+  }
+
+  .x-rotate {
+    display: inline-block;
+    position: relative;
+    min-width: 2.5ch;
+    text-align: right;
+  }
+  .x-rotate-word {
+    display: inline-block;
+    position: absolute;
+    right: 0; top: 0;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+  }
+  .x-rotate-word.active {
+    opacity: 1;
+    transform: translateY(0);
+    position: relative;
+  }
+
+  .hero-sub {
+    font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+    color: var(--text-secondary);
+    max-width: 50ch; line-height: 1.7;
+    margin-bottom: 44px;
+    position: relative; z-index: 2;
+    opacity: 0; animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.6s forwards;
+  }
+
+  .hero-cta-group {
+    display: flex; gap: 16px; align-items: center;
+    position: relative; z-index: 2;
+    opacity: 0; animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.8s forwards;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 32px;
+    background: var(--text-primary);
+    color: var(--bg);
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 1rem;
+    border: none; border-radius: 12px;
+    cursor: pointer; text-decoration: none;
+    letter-spacing: -0.01em;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 40px -8px rgba(255,255,255,0.12);
+  }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 28px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-display);
+    font-weight: 600; font-size: 1rem;
+    border: 1px solid var(--border); border-radius: 12px;
+    cursor: pointer; text-decoration: none;
+    transition: all 0.3s;
+  }
+  .btn-secondary:hover {
+    color: var(--text-primary);
+    border-color: var(--text-tertiary);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== X EQUATION ===== */
+  .equation {
+    padding: 80px 24px;
+    display: flex; flex-direction: column; align-items: center;
+    position: relative;
+  }
+  .eq-row {
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--font-display);
+    font-weight: 700; font-size: clamp(1.1rem, 2vw, 1.5rem);
+    color: var(--text-secondary);
+    flex-wrap: wrap; justify-content: center;
+    opacity: 0; transform: translateY(24px);
+    transition: all 0.8s cubic-bezier(0.16,1,0.3,1);
+  }
+  .eq-row.visible { opacity: 1; transform: translateY(0); }
+  .eq-box {
+    padding: 10px 22px; border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-primary);
+  }
+  .eq-x-box {
+    padding: 10px 22px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    position: relative; overflow: hidden;
+    color: var(--text-primary);
+  }
+  .eq-x-box::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg,
+      oklch(0.2 0.06 275), oklch(0.2 0.06 155), oklch(0.2 0.06 338), oklch(0.2 0.06 68));
+    background-size: 300% 300%;
+    animation: gradShift 6s ease-in-out infinite;
+    z-index: -1;
+  }
+  @keyframes gradShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .eq-op { font-size: 1.4em; color: var(--text-tertiary); }
+  .eq-result { font-weight: 800; font-size: 1.15em; color: var(--text-primary); }
+
+  /* ===== STUDIOS GRID ===== */
+  .studios {
+    padding: 96px 24px;
+    max-width: 1200px; margin: 0 auto;
+  }
+  .studios-header {
+    text-align: center; margin-bottom: 64px;
+  }
+  .studios-header h2 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+  .studios-header p {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    max-width: 52ch; margin: 0 auto;
+  }
+
+  .studio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  .studio-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative; overflow: hidden;
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1),
+                transform 0.6s cubic-bezier(0.16,1,0.3,1),
+                border-color 0.3s, background 0.3s, box-shadow 0.3s;
+  }
+  .studio-card.visible { opacity: 1; transform: translateY(0); }
+  .studio-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-accent);
+    opacity: 0; transition: opacity 0.35s;
+  }
+  .studio-card:hover {
+    border-color: var(--card-accent);
+    background: var(--surface-hover);
+    transform: translateY(-6px) !important;
+    box-shadow: 0 20px 60px -20px color-mix(in oklch, var(--card-accent) 20%, transparent);
+  }
+  .studio-card:hover::before { opacity: 1; }
+  .studio-card:hover .studio-arrow { opacity: 1; transform: translate(2px, -2px); }
+  .studio-card:hover .card-x { transform: scale(1.1); }
+
+  .card-x {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.95rem; font-weight: 800;
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+    transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+  }
+  .studio-card h3 {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 1.2rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    display: flex; align-items: baseline; gap: 4px;
+  }
+  .studio-card h3 .x-prefix {
+    color: var(--card-accent);
+    opacity: 0.7;
+    font-size: 0.85em;
+  }
+  .studio-card > p {
+    color: var(--text-secondary);
+    font-size: 0.88rem; line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  .studio-skills {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .studio-skills span {
+    font-size: 0.73rem;
+    padding: 4px 10px; border-radius: 6px;
+    background: rgba(255,255,255,0.04);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+  .studio-arrow {
+    position: absolute; top: 28px; right: 28px;
+    color: var(--card-accent);
+    opacity: 0;
+    transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
+    font-size: 1.15rem;
+  }
+
+  .card-pm { --card-accent: var(--c-pm); }
+  .card-pm .card-x { background: oklch(0.2 0.06 275); color: var(--c-pm); }
+  .card-eng { --card-accent: var(--c-eng); }
+  .card-eng .card-x { background: oklch(0.2 0.06 155); color: var(--c-eng); }
+  .card-design { --card-accent: var(--c-design); }
+  .card-design .card-x { background: oklch(0.2 0.06 338); color: var(--c-design); }
+  .card-sales { --card-accent: var(--c-sales); }
+  .card-sales .card-x { background: oklch(0.2 0.06 68); color: var(--c-sales); }
+  .card-hr { --card-accent: var(--c-hr); }
+  .card-hr .card-x { background: oklch(0.2 0.06 22); color: var(--c-hr); }
+  .card-creator { --card-accent: var(--c-creator); }
+  .card-creator .card-x { background: oklch(0.2 0.06 205); color: var(--c-creator); }
+  .card-research { --card-accent: var(--c-research); }
+  .card-research .card-x { background: oklch(0.2 0.06 118); color: var(--c-research); }
+  .card-custom { --card-accent: var(--c-you); border-style: dashed; }
+  .card-custom .card-x { background: oklch(0.16 0.02 55); color: var(--c-you); border: 1px dashed oklch(0.5 0.08 55); }
+
+  /* ===== HOW IT WORKS ===== */
+  .how {
+    padding: 96px 24px;
+    max-width: 880px; margin: 0 auto;
+  }
+  .how h2 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+    letter-spacing: -0.03em;
+    text-align: center; margin-bottom: 64px;
+  }
+  .how-steps { display: flex; flex-direction: column; gap: 40px; }
+  .how-step {
+    display: grid; grid-template-columns: 56px 1fr;
+    gap: 20px; align-items: start;
+    opacity: 0; transform: translateX(-20px);
+    transition: all 0.6s cubic-bezier(0.16,1,0.3,1);
+  }
+  .how-step.visible { opacity: 1; transform: translateX(0); }
+  .step-num {
+    width: 56px; height: 56px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 800; font-size: 1.2rem;
+    border: 1px solid var(--border);
+  }
+  .step-1 .step-num { background: oklch(0.16 0.04 275); color: var(--c-pm); }
+  .step-2 .step-num { background: oklch(0.16 0.04 155); color: var(--c-eng); }
+  .step-3 .step-num { background: oklch(0.16 0.04 338); color: var(--c-design); }
+  .how-step h3 {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 1.2rem;
+    letter-spacing: -0.02em; margin-bottom: 6px;
+  }
+  .how-step p {
+    color: var(--text-secondary);
+    font-size: 0.95rem; line-height: 1.6;
+    max-width: 55ch;
+  }
+
+  /* ===== VISION SECTION ===== */
+  .vision {
+    padding: 120px 24px;
+    max-width: 720px; margin: 0 auto;
+    text-align: center;
+  }
+  .vision-label {
+    font-size: 0.78rem; text-transform: uppercase;
+    letter-spacing: 0.14em; font-weight: 600;
+    color: var(--text-tertiary); margin-bottom: 28px;
+  }
+  .vision h2 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.6rem, 3vw, 2.3rem);
+    letter-spacing: -0.03em; line-height: 1.35;
+    margin-bottom: 24px;
+  }
+  .vision p {
+    color: var(--text-secondary);
+    font-size: 1.05rem; line-height: 1.75;
+    margin-bottom: 20px;
+  }
+  .vision em { font-style: normal; font-weight: 600; color: var(--text-primary); }
+
+  .x-visual {
+    margin: 48px auto;
+    padding: 40px 28px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--surface);
+    position: relative; overflow: hidden;
+  }
+  .x-visual::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg,
+      oklch(0.14 0.03 275), oklch(0.14 0.03 155), oklch(0.14 0.03 338),
+      oklch(0.14 0.03 68), oklch(0.14 0.03 205));
+    background-size: 400% 400%;
+    animation: gradShift 10s ease-in-out infinite;
+    opacity: 0.35;
+  }
+  .x-formula {
+    position: relative;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    letter-spacing: 0.03em;
+  }
+  .x-formula span { color: var(--text-primary); }
+  .x-divider {
+    position: relative;
+    width: 2px; height: 28px;
+    background: linear-gradient(to bottom, var(--text-tertiary), transparent);
+    margin: 0 auto 16px;
+  }
+  .x-branches {
+    position: relative;
+    display: flex; justify-content: center;
+    gap: 8px; flex-wrap: wrap;
+  }
+  .x-branch {
+    padding: 6px 14px; border-radius: 8px;
+    font-size: 0.8rem; font-weight: 600;
+    font-family: var(--font-display);
+    border: 1px solid rgba(255,255,255,0.07);
+    opacity: 0; transform: translateY(12px);
+    transition: all 0.5s cubic-bezier(0.16,1,0.3,1);
+  }
+  .x-branch.visible { opacity: 1; transform: translateY(0); }
+  .x-branch:nth-child(1) { background: oklch(0.2 0.05 275); color: var(--c-pm); }
+  .x-branch:nth-child(2) { background: oklch(0.2 0.05 155); color: var(--c-eng); }
+  .x-branch:nth-child(3) { background: oklch(0.2 0.05 338); color: var(--c-design); }
+  .x-branch:nth-child(4) { background: oklch(0.2 0.05 68); color: var(--c-sales); }
+  .x-branch:nth-child(5) { background: oklch(0.2 0.05 205); color: var(--c-creator); }
+  .x-branch:nth-child(6) { background: oklch(0.2 0.05 22); color: var(--c-hr); }
+  .x-branch:nth-child(7) { background: oklch(0.2 0.05 118); color: var(--c-research); }
+  .x-branch:nth-child(8) { background: oklch(0.16 0.02 55); color: var(--c-you); border-style: dashed; }
+  .x-caption {
+    position: relative;
+    margin-top: 24px;
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+    font-family: var(--font-body);
+  }
+
+  /* ===== CTA ===== */
+  .cta {
+    padding: 120px 24px;
+    text-align: center;
+    position: relative;
+  }
+  .cta::before {
+    content: '';
+    position: absolute;
+    bottom: 25%; left: 50%; transform: translateX(-50%);
+    width: 700px; height: 400px;
+    background:
+      radial-gradient(ellipse 200px 150px at 35% 50%, oklch(0.22 0.08 275 / 0.15), transparent),
+      radial-gradient(ellipse 180px 150px at 65% 50%, oklch(0.22 0.08 155 / 0.12), transparent),
+      radial-gradient(ellipse 150px 150px at 50% 40%, oklch(0.22 0.08 338 / 0.1), transparent);
+    filter: blur(50px);
+    pointer-events: none;
+  }
+  .cta h2 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .cta p {
+    color: var(--text-secondary);
+    margin-bottom: 32px; font-size: 1.05rem;
+    position: relative;
+  }
+
+  footer {
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 0.8rem;
+    border-top: 1px solid rgba(37,37,48,0.5);
+  }
+
+  /* ===== SCROLL REVEAL ===== */
+  .reveal {
+    opacity: 0; transform: translateY(28px);
+    transition: all 0.8s cubic-bezier(0.16,1,0.3,1);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ===== MOBILE ===== */
+  @media (max-width: 640px) {
+    nav { padding: 12px 16px; }
+    .nav-links a:not(.nav-cta) { display: none; }
+    .hero { padding: 100px 20px 60px; }
+    .hero h1 { font-size: 2.6rem; }
+    .studios { padding: 64px 16px; }
+    .studio-grid { grid-template-columns: 1fr; }
+    .how { padding: 64px 16px; }
+    .vision { padding: 80px 16px; }
+    .cta { padding: 80px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    Any<span class="dot"></span>Studio
+  </div>
+  <div class="nav-links">
+    <a href="#studios">Studios</a>
+    <a href="#how">How it works</a>
+    <a href="#vision">Vision</a>
+    <a href="#" class="nav-cta">Download</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">Formerly PM Studio — now for any professional</div>
+
+  <h1>
+    <span class="x-rotate" id="xRotate"></span>Studio.
+  </h1>
+
+  <p class="hero-sub">
+    Any is a variable. It can be PM. Engineer. Designer. Sales. Creator. Anyone.<br>
+    One system, infinite roles. Define the prompt, give it skills — become the fullest version of yourself.
+  </p>
+
+  <div class="hero-cta-group">
+    <a href="#" class="btn-primary">Download Any. Studio <span>→</span></a>
+    <a href="#studios" class="btn-secondary">Explore Studios</a>
+  </div>
+</section>
+
+<!-- EQUATION -->
+<section class="equation">
+  <div class="eq-row" id="eqRow">
+    <span class="eq-box">You</span>
+    <span class="eq-op">+</span>
+    <span class="eq-x-box">Any. Studio</span>
+    <span class="eq-op">=</span>
+    <span class="eq-result">Superpower Unlocked</span>
+  </div>
+</section>
+
+<!-- STUDIOS -->
+<section class="studios" id="studios">
+  <div class="studios-header reveal">
+    <h2>One engine. Every superpower.</h2>
+    <p>Same engine. Different superpowers. Each studio ships with a tailored AI partner — the right prompt, skills, and tools for your role.</p>
+  </div>
+  <div class="studio-grid">
+    <div class="studio-card card-pm">
+      <div class="studio-arrow">↗</div>
+      <div class="card-x">PM</div>
+      <h3>PM. Studio</h3>
+      <p>From user insight to shipped product. Write specs, run competitive analysis, scope MVPs, craft launch plans.</p>
+      <div class="studio-skills">
+        <span>User Research</span><span>Spec Writing</span><span>MVP Scoping</span><span>Launch Playbook</span>
+      </div>
+    </div>
+    <div class="studio-card card-eng">
+      <div class="studio-arrow">↗</div>
+      <div class="card-x">Eng</div>
+      <h3>Eng. Studio</h3>
+      <p>Ship faster with AI pair programming. Debug systematically, architect thoughtfully, deploy confidently.</p>
+      <div class="studio-skills">
+        <span>Code Generation</span><span>Debug</span><span>Architecture</span><span>CI/CD</span>
+      </div>
+    </div>
+    <div class="studio-card card-design">
+      <div class="studio-arrow">↗</div>
+      <div class="card-x">Des</div>
+      <h3>Design. Studio</h3>
+      <p>Explore visual directions, generate moodboards, review UX flows, and write copy that converts.</p>
+      <div class="studio-skills">
+        <span>Design Thinking</span><span>Moodboard</span><span>UX Review</span><span>Copywriting</span>
+      </div>
+    </div>
+    <div class="studio-card card-sales">
+      <div class="studio-arrow">↗</div>
+      <div class="card-x">Sales</div>
+      <h3>Sales. Studio</h3>
+      <p>Qualify leads, craft outreach, prep for calls, and close deals with AI-powered intelligence.</p>
+      <div class="studio-skills">
+        <span>Lead Scoring</span><span>Email Sequence</span><span>Call Prep</span><span>CRM Sync</span>
+      </div>
+    </div>
+    <div class="studio-card card-hr">
+      <div class="studio-arrow">↗</div>
+      <div class="card-x">HR</div>
+      <h3>HR. Studio</h3>
+      <p>Screen resumes, schedule interviews, draft offers, and build a hiring pipeline on autopilot.</p>
+      <div class="studio-skills">
+        <span>Resume Screening</span><span>Interview Prep</span><span>Offer Drafting</span><span>Pipeline</span>
+      </div>
+    </div>
+    <div class="studio-card card-creator">
+      <div class="studio-arrow">↗</div>
+      <div class="card-x">Cre</div>
+      <h3>Creator. Studio</h3>
+      <p>Write posts, design carousels, plan content calendars, and grow your audience across platforms.</p>
+      <div class="studio-skills">
+        <span>Blog Writing</span><span>Social Media</span><span>小红书</span><span>Video Script</span>
+      </div>
+    </div>
+    <div class="studio-card card-research">
+      <div class="studio-arrow">↗</div>
+      <div class="card-x">Res</div>
+      <h3>Research. Studio</h3>
+      <p>Deep-dive into any topic. Synthesize papers, extract insights, build knowledge bases, write reports.</p>
+      <div class="studio-skills">
+        <span>Web Research</span><span>Paper Analysis</span><span>Report Writing</span><span>Data Viz</span>
+      </div>
+    </div>
+    <div class="studio-card card-custom">
+      <div class="studio-arrow">↗</div>
+      <div class="card-x">?</div>
+      <h3>Your. Studio</h3>
+      <p>Any is a variable — define your own. Pick the prompt, choose the skills, connect the tools. Build the studio only you could imagine.</p>
+      <div class="studio-skills">
+        <span>Custom Prompt</span><span>Any Skills</span><span>Any Tools</span><span>Your Context</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <h2 class="reveal">Three steps to superpowers.</h2>
+  <div class="how-steps">
+    <div class="how-step step-1">
+      <div class="step-num">1</div>
+      <div>
+        <h3>Pick any role — or define a new one</h3>
+        <p>Choose a pre-configured studio for your role, or start from scratch. Each comes with a tailored system prompt, curated skills, and the right tool integrations.</p>
+      </div>
+    </div>
+    <div class="how-step step-2">
+      <div class="step-num">2</div>
+      <div>
+        <h3>Work with your AI partner</h3>
+        <p>Your agent learns your preferences, remembers context across sessions, and evolves with you. Not a chatbot — a partner that gets better every day.</p>
+      </div>
+    </div>
+    <div class="how-step step-3">
+      <div class="step-num">3</div>
+      <div>
+        <h3>Ship like a team of ten</h3>
+        <p>Write specs, generate code, design interfaces, craft marketing copy, analyze data — all from one seat. One person, fully armed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VISION -->
+<section class="vision" id="vision">
+  <div class="vision-label">Our belief</div>
+  <h2 class="reveal">Everyone deserves superpowers.</h2>
+  <p class="reveal">Before Any. Studio, superpowers belonged to teams with headcount. PMs needed engineers. Engineers needed designers. Designers needed researchers. Everyone waited on everyone.</p>
+  <p class="reveal">We believe <em>one person with the right system</em> can do what used to take ten. Any. Studio is that system — it shapes itself to your role, learns your style, and gives you capabilities you never had before.</p>
+  <p class="reveal"><em>Any is a variable. You are the constant.</em></p>
+
+  <div class="x-visual reveal">
+    <div class="x-formula"><span>Any</span>. Studio = System Prompt + Skills + Tools + Context</div>
+    <div class="x-divider"></div>
+    <div class="x-branches" id="xBranches">
+      <div class="x-branch">PM</div>
+      <div class="x-branch">Engineer</div>
+      <div class="x-branch">Designer</div>
+      <div class="x-branch">Sales</div>
+      <div class="x-branch">Creator</div>
+      <div class="x-branch">HR</div>
+      <div class="x-branch">Researcher</div>
+      <div class="x-branch">You Name It</div>
+    </div>
+    <div class="x-caption">When Any can be anything, everyone gets superpowers.</div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2 class="reveal">Define yours.</h2>
+  <p class="reveal">Download Any. Studio. Pick your role. Start shipping.</p>
+  <a href="#" class="btn-primary reveal">Download Any. Studio <span>→</span></a>
+</section>
+
+<footer>
+  <p>Any. Studio — Everyone deserves superpowers. © 2026</p>
+</footer>
+
+<script>
+  // X. rotation in hero headline
+  const roles = [
+    { text: 'PM.', color: 'var(--c-pm)' },
+    { text: 'Eng.', color: 'var(--c-eng)' },
+    { text: 'Design.', color: 'var(--c-design)' },
+    { text: 'Sales.', color: 'var(--c-sales)' },
+    { text: 'HR.', color: 'var(--c-hr)' },
+    { text: 'Creator.', color: 'var(--c-creator)' },
+    { text: 'Research.', color: 'var(--c-research)' },
+    { text: 'Any.', color: 'var(--text-primary)' },
+  ];
+  const rotateEl = document.getElementById('xRotate');
+  roles.forEach((r, i) => {
+    const span = document.createElement('span');
+    span.className = 'x-rotate-word' + (i === 0 ? ' active' : '');
+    span.textContent = r.text;
+    span.style.color = r.color;
+    rotateEl.appendChild(span);
+  });
+  let current = 0;
+  setInterval(() => {
+    const words = rotateEl.querySelectorAll('.x-rotate-word');
+    words[current].classList.remove('active');
+    current = (current + 1) % words.length;
+    words[current].classList.add('active');
+  }, 2000);
+
+  // Scroll reveal
+  const revealObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal, .eq-row').forEach(el => revealObs.observe(el));
+
+  // Studio cards staggered
+  const cards = document.querySelectorAll('.studio-card');
+  const cardObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const idx = Array.from(cards).indexOf(e.target);
+        e.target.style.transitionDelay = (idx * 0.07) + 's';
+        e.target.classList.add('visible');
+        cardObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  cards.forEach(c => cardObs.observe(c));
+
+  // How steps
+  const steps = document.querySelectorAll('.how-step');
+  const stepObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const idx = Array.from(steps).indexOf(e.target);
+        e.target.style.transitionDelay = (idx * 0.12) + 's';
+        e.target.classList.add('visible');
+        stepObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.2 });
+  steps.forEach(s => stepObs.observe(s));
+
+  // X branches staggered
+  const branches = document.querySelectorAll('.x-branch');
+  const branchObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        branches.forEach((b, i) => {
+          setTimeout(() => b.classList.add('visible'), i * 90);
+        });
+        branchObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  if (branches[0]) branchObs.observe(branches[0].parentElement);
+</script>
+</body>
+</html>
