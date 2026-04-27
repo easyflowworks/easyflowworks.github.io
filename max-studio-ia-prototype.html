@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>maX. Studio — Master Agent IA Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #08080a;
+  --surface: #121216;
+  --surface-hover: #1a1a20;
+  --surface-alt: #0e0e12;
+  --border: #252530;
+  --border-light: #303040;
+  --text-primary: #f0eff2;
+  --text-secondary: #888790;
+  --text-tertiary: #555460;
+  --c-master: oklch(0.72 0.17 275);
+  --c-master-bg: oklch(0.2 0.06 275);
+  --c-project-a: oklch(0.72 0.17 155);
+  --c-project-a-bg: oklch(0.2 0.06 155);
+  --c-project-b: oklch(0.72 0.17 338);
+  --c-project-b-bg: oklch(0.2 0.06 338);
+  --c-briefing: oklch(0.72 0.17 68);
+  --c-briefing-bg: oklch(0.2 0.06 68);
+  --c-todo: oklch(0.72 0.17 22);
+  --c-todo-bg: oklch(0.2 0.06 22);
+  --c-eval: oklch(0.72 0.17 205);
+  --c-eng: oklch(0.72 0.17 155);
+  --font-display: 'Bricolage Grotesque', sans-serif;
+  --font-body: 'Figtree', sans-serif;
+  --sidebar-w: 260px;
+  --nav-h: 0px;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--text-primary);
+  font-family: var(--font-body); line-height: 1.6;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  height: 100vh; overflow: hidden;
+}
+.screen { display: none; height: calc(100vh - var(--nav-h)); width: 100vw; position: absolute; top: 0; left: 0; }
+.screen.active { display: flex; }
+.screen-fre { flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; }
+.screen-app { flex-direction: row; }
+
+/* maX branding */
+.x-hi { font-style: normal; color: var(--c-eng); animation: xColorCycle 5s ease-in-out infinite; }
+@keyframes xColorCycle {
+  0%, 100% { color: var(--c-eng); } 14% { color: var(--c-master); }
+  28% { color: var(--c-project-b); } 42% { color: var(--c-briefing); }
+  56% { color: var(--c-todo); } 70% { color: var(--c-eval); } 84% { color: oklch(0.72 0.17 118); }
+}
+
+/* Top bar */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 48px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; background: rgba(8,8,10,0.85); backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(37,37,48,0.5);
+}
+.topbar-logo {
+  font-family: var(--font-display); font-weight: 800; font-size: 1.1rem;
+  letter-spacing: -0.04em;
+}
+.topbar-logo .dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  margin: 0 2px 0 1px; vertical-align: middle;
+  background: var(--c-eng); animation: xColorCycle 5s ease-in-out infinite;
+}
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.topbar-avatar {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--c-master-bg); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 600; color: var(--c-master);
+}
+.topbar-screen-label {
+  font-size: 0.75rem; color: var(--text-tertiary);
+  text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500;
+}
+
+/* FRE */
+.fre-container {
+  max-width: 580px; width: 100%; padding: 40px 32px 80px; position: relative; z-index: 2;
+}
+.fre-container::before {
+  content: ''; position: absolute; top: -40%; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 500px;
+  background:
+    radial-gradient(ellipse 250px 200px at 40% 40%, oklch(0.25 0.1 275 / 0.2), transparent),
+    radial-gradient(ellipse 200px 180px at 65% 50%, oklch(0.25 0.1 155 / 0.15), transparent);
+  filter: blur(70px); pointer-events: none; z-index: -1;
+}
+.fre-step { display: none; animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
+.fre-step.active { display: block; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+.fre-eyebrow {
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.3em;
+  color: var(--text-tertiary); font-weight: 300; margin-bottom: 16px;
+  font-family: var(--font-body);
+}
+.fre-title {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(1.8rem, 4vw, 2.4rem); letter-spacing: -0.04em;
+  line-height: 1.15; margin-bottom: 12px;
+}
+.fre-sub { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 32px; max-width: 44ch; }
+.fre-progress { display: flex; gap: 6px; margin-bottom: 28px; }
+.fre-progress-dot { width: 32px; height: 4px; border-radius: 2px; background: var(--border); transition: background 0.3s; }
+.fre-progress-dot.done { background: var(--c-master); }
+.fre-progress-dot.current { background: var(--text-primary); }
+.fre-sources { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.fre-source-card {
+  display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all 0.3s;
+}
+.fre-source-card:hover { border-color: var(--c-master); background: var(--surface-hover); }
+.fre-source-card.connected { border-color: var(--c-project-a); }
+.fre-source-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.95rem; font-weight: 600; background: var(--surface-hover);
+}
+.fre-source-card h4 { font-family: var(--font-display); font-weight: 600; font-size: 0.9rem; }
+.fre-source-card p { font-size: 0.78rem; color: var(--text-secondary); }
+.fre-source-status {
+  margin-left: auto; font-size: 0.72rem; font-weight: 600; padding: 4px 10px; border-radius: 6px;
+  background: rgba(255,255,255,0.04); color: var(--text-tertiary);
+}
+.fre-source-card.connected .fre-source-status { background: oklch(0.2 0.06 155); color: var(--c-project-a); }
+.fre-value-flash {
+  margin-top: 20px; padding: 14px 18px; border-radius: 12px;
+  border: 1px solid oklch(0.3 0.08 155 / 0.3); background: oklch(0.12 0.03 155 / 0.3);
+  font-size: 0.85rem; color: var(--c-project-a); display: none; animation: fadeUp 0.5s ease forwards;
+}
+.fre-value-flash.show { display: block; }
+.fre-chat { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+.fre-chat-msg { max-width: 88%; padding: 12px 16px; border-radius: 14px; font-size: 0.88rem; line-height: 1.5; }
+.fre-chat-msg.agent { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.fre-chat-msg.user { align-self: flex-end; background: var(--c-master-bg); border: 1px solid oklch(0.3 0.08 275 / 0.3); border-bottom-right-radius: 4px; color: oklch(0.9 0.05 275); }
+.fre-chat-msg .agent-label { font-size: 0.68rem; font-weight: 600; color: var(--c-master); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.fre-project-suggestion { margin-top: 16px; padding: 16px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); }
+.fre-project-suggestion h4 { font-family: var(--font-display); font-weight: 700; font-size: 0.88rem; margin-bottom: 10px; color: var(--c-master); }
+.fre-project-pill {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 10px; margin: 4px;
+  border: 1px solid var(--border); background: var(--surface-hover); font-size: 0.82rem; font-weight: 500;
+}
+.fre-project-pill .pip { width: 8px; height: 8px; border-radius: 50%; }
+.fre-input {
+  width: 100%; padding: 14px 18px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-primary); font-family: var(--font-body);
+  font-size: 0.9rem; outline: none; margin-bottom: 16px; resize: none;
+}
+.fre-input:focus { border-color: var(--c-master); }
+.fre-input::placeholder { color: var(--text-tertiary); }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; border-radius: 10px; border: none;
+  font-family: var(--font-display); font-weight: 700; font-size: 0.9rem; cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.btn-p { background: var(--text-primary); color: var(--bg); }
+.btn-p:hover { transform: translateY(-2px); box-shadow: 0 8px 30px -6px rgba(255,255,255,0.12); }
+.btn-g { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+.btn-g:hover { color: var(--text-primary); border-color: var(--text-tertiary); }
+.tag { font-size: 0.72rem; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.04); color: var(--text-secondary); border: 1px solid rgba(255,255,255,0.04); }
+</style>
+<style>
+/* App shell */
+.sidebar {
+  width: var(--sidebar-w); min-width: var(--sidebar-w);
+  height: calc(100vh - 48px - var(--nav-h)); margin-top: 48px;
+  background: var(--surface-alt); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 16px 12px; overflow-y: auto;
+}
+.sidebar-section { margin-bottom: 20px; }
+.sidebar-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-tertiary); font-weight: 600; padding: 0 8px; margin-bottom: 6px; }
+.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; cursor: pointer; transition: all 0.2s; margin-bottom: 2px; }
+.sidebar-item:hover, .sidebar-item.active { background: var(--surface-hover); }
+.sidebar-icon { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; font-family: var(--font-display); flex-shrink: 0; }
+.sidebar-item-text h4 { font-family: var(--font-display); font-weight: 600; font-size: 0.82rem; line-height: 1.2; }
+.sidebar-item-text p { font-size: 0.68rem; color: var(--text-tertiary); line-height: 1.3; }
+.sidebar-badge { margin-left: auto; min-width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; flex-shrink: 0; }
+.sidebar-divider { height: 1px; background: var(--border); margin: 8px 6px; }
+.main-content { flex: 1; height: calc(100vh - 48px - var(--nav-h)); margin-top: 48px; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Chat */
+.chat-panel { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.chat-header { padding: 14px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.chat-header-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800; font-family: var(--font-display); }
+.chat-header-info h3 { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; letter-spacing: -0.02em; }
+.chat-header-info p { font-size: 0.72rem; color: var(--text-secondary); }
+.chat-body { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+.chat-msg { max-width: 75%; padding: 12px 16px; border-radius: 14px; font-size: 0.86rem; line-height: 1.55; }
+.chat-msg.a { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.chat-msg.u { align-self: flex-end; background: var(--c-master-bg); border: 1px solid oklch(0.3 0.08 275 / 0.3); border-bottom-right-radius: 4px; }
+.msg-label { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+.dc { padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-alt); margin-top: 8px; }
+.dc h5 { font-family: var(--font-display); font-weight: 700; font-size: 0.78rem; margin-bottom: 8px; }
+.dc .dr { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 0.78rem; }
+.dc .dp { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dc .da { color: var(--text-tertiary); font-size: 0.7rem; }
+.dc .ds { margin-left: auto; font-size: 0.68rem; padding: 2px 8px; border-radius: 5px; font-weight: 600; }
+.chat-input-bar { padding: 14px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+.chat-input { flex: 1; padding: 11px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); font-family: var(--font-body); font-size: 0.88rem; outline: none; }
+.chat-input:focus { border-color: var(--c-master); }
+.chat-input::placeholder { color: var(--text-tertiary); }
+.chat-send { width: 38px; height: 38px; border-radius: 10px; border: none; background: var(--text-primary); color: var(--bg); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+/* Briefing, TODO, Orch */
+.scroll-panel { flex: 1; overflow-y: auto; padding: 28px 32px; }
+.panel-title { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; letter-spacing: -0.03em; margin-bottom: 6px; }
+.panel-sub { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 24px; }
+.section { margin-bottom: 24px; }
+.section-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-tertiary); font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.card { padding: 13px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); margin-bottom: 7px; cursor: pointer; transition: all 0.2s; }
+.card:hover { border-color: var(--text-tertiary); background: var(--surface-hover); }
+.card h4 { font-family: var(--font-display); font-weight: 600; font-size: 0.86rem; margin-bottom: 3px; display: flex; align-items: center; gap: 8px; }
+.card p { font-size: 0.77rem; color: var(--text-secondary); line-height: 1.5; }
+.card .src { margin-top: 6px; font-size: 0.68rem; color: var(--text-tertiary); }
+.pt { font-size: 0.6rem; font-weight: 700; padding: 2px 7px; border-radius: 4px; white-space: nowrap; }
+.p0 { background: oklch(0.2 0.08 22); color: var(--c-todo); }
+.p1 { background: oklch(0.2 0.06 68); color: var(--c-briefing); }
+.p2 { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
+
+/* TODO items */
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); margin-bottom: 5px; cursor: pointer; }
+.todo-item:hover { border-color: var(--text-tertiary); }
+.todo-check { width: 17px; height: 17px; border-radius: 5px; border: 2px solid var(--border); flex-shrink: 0; margin-top: 2px; cursor: pointer; transition: all 0.2s; }
+.todo-item.done .todo-check { background: var(--c-project-a); border-color: var(--c-project-a); }
+.todo-item.done .todo-text { text-decoration: line-through; color: var(--text-tertiary); }
+.todo-text { font-size: 0.82rem; line-height: 1.4; }
+.todo-meta { margin-left: auto; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.todo-tag { font-size: 0.63rem; font-weight: 600; padding: 2px 8px; border-radius: 5px; white-space: nowrap; }
+
+/* Orchestration */
+.orch-graph { display: flex; flex-direction: column; align-items: center; padding: 20px 0; }
+.orch-node { padding: 16px 24px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); text-align: center; min-width: 180px; }
+.orch-node h4 { font-family: var(--font-display); font-weight: 700; font-size: 0.88rem; margin-bottom: 3px; }
+.orch-node p { font-size: 0.7rem; color: var(--text-secondary); }
+.orch-line { width: 2px; height: 24px; background: var(--border-light); }
+.orch-branches { display: flex; gap: 16px; align-items: flex-start; position: relative; padding-top: 8px; }
+.orch-branches::before { content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 2px; background: var(--border-light); }
+.orch-branch-line { width: 2px; height: 18px; background: var(--border-light); margin: 0 auto 6px; }
+
+/* Panels */
+.panel { display: none; flex: 1; flex-direction: column; min-height: 0; }
+.panel.active { display: flex; }
+@media (max-width: 768px) { .sidebar { display: none; } :root { --sidebar-w: 0; } }
+</style>
+</head>
+<body>
+
+
+<!-- ===== SCREEN 1: FRE ===== -->
+<div class="screen screen-fre active" id="screen-fre">
+  <div class="fre-container">
+    <div class="fre-step active" id="fre-step-1">
+      <div class="fre-progress"><div class="fre-progress-dot current"></div><div class="fre-progress-dot"></div><div class="fre-progress-dot"></div><div class="fre-progress-dot"></div></div>
+      <div class="fre-eyebrow">WELCOME TO <span style="text-transform:none">ma</span><em class="x-hi">X</em>. STUDIO</div>
+      <div class="fre-title">Let's set you up.<br>It takes 2 minutes.</div>
+      <p class="fre-sub">Connect your tools and I'll start working for you immediately -- not after setup.</p>
+      <div class="fre-sources">
+        <div class="fre-source-card" onclick="connectSource(this,'teams')">
+          <div class="fre-source-icon">T</div>
+          <div><h4>Microsoft Teams</h4><p>Messages, channels, meetings</p></div>
+          <span class="fre-source-status">Connect</span>
+        </div>
+        <div class="fre-source-card" onclick="connectSource(this,'outlook')">
+          <div class="fre-source-icon">O</div>
+          <div><h4>Outlook</h4><p>Emails, calendar, contacts</p></div>
+          <span class="fre-source-status">Connect</span>
+        </div>
+        <div class="fre-source-card" onclick="connectSource(this,'slack')">
+          <div class="fre-source-icon">S</div>
+          <div><h4>Slack</h4><p>Workspace messages, threads</p></div>
+          <span class="fre-source-status">Connect</span>
+        </div>
+      </div>
+      <div class="fre-value-flash" id="value-flash">12 unread Teams threads found. 3 need your reply today. I'll triage them while we keep going.</div>
+      <button class="btn btn-p" onclick="freNext(2)">Continue</button>
+    </div>
+
+    <div class="fre-step" id="fre-step-2">
+      <div class="fre-progress"><div class="fre-progress-dot done"></div><div class="fre-progress-dot current"></div><div class="fre-progress-dot"></div><div class="fre-progress-dot"></div></div>
+      <div class="fre-eyebrow">FINDING YOUR <em class="x-hi">X</em></div>
+      <div class="fre-title">Tell me who you are.</div>
+      <p class="fre-sub">I understand you, and that is how I find your X. Your role, your context, your style -- that is what makes this yours.</p>
+      <input class="fre-input" placeholder="Your name" value="Tracy Chen">
+      <input class="fre-input" placeholder="Your role" value="Head of Product, Edge Mobile">
+      <input class="fre-input" placeholder="Your organization" value="Microsoft Edge">
+      <textarea class="fre-input" rows="2" placeholder="Anything else?">I prefer concise, direct communication. No fluff.</textarea>
+      <div style="display:flex;gap:10px"><button class="btn btn-g" onclick="freNext(1)">Back</button><button class="btn btn-p" onclick="freNext(3)">Continue</button></div>
+    </div>
+
+    <div class="fre-step" id="fre-step-3">
+      <div class="fre-progress"><div class="fre-progress-dot done"></div><div class="fre-progress-dot done"></div><div class="fre-progress-dot current"></div><div class="fre-progress-dot"></div></div>
+      <div class="fre-eyebrow">Step 3 of 4</div>
+      <div class="fre-title">What are you working on?</div>
+      <p class="fre-sub">Just talk to me naturally. I'll figure out the structure.</p>
+      <div class="fre-chat">
+        <div class="fre-chat-msg agent">
+          <div class="agent-label">ma<em class="x-hi">X</em>. Studio</div>
+          I see from your Teams that you're active in channels for "Edge Mobile" and "PM Studio". Tell me more -- what are your main projects right now?
+        </div>
+        <div class="fre-chat-msg user">I'm leading Edge Mobile -- we're building the new tab page experience and expanding to iOS. I also run PM Studio as a side project, building AI tools for PMs.</div>
+        <div class="fre-chat-msg agent">
+          <div class="agent-label">ma<em class="x-hi">X</em>. Studio</div>
+          Got it. Two distinct workstreams with different stakeholders and timelines. I'll keep them separate in my head but surface connections when they matter.
+        </div>
+      </div>
+      <div class="fre-project-suggestion">
+        <h4>I identified 2 workstreams</h4>
+        <div class="fre-project-pill"><span class="pip" style="background:var(--c-project-a)"></span> Edge Mobile</div>
+        <div class="fre-project-pill"><span class="pip" style="background:var(--c-project-b)"></span> PM Studio</div>
+        <p style="font-size:0.75rem;color:var(--text-tertiary);margin-top:10px">I won't create separate agents yet -- I'll handle everything. When patterns emerge, I'll suggest splitting.</p>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px"><button class="btn btn-g" onclick="freNext(2)">Back</button><button class="btn btn-p" onclick="freNext(4)">Looks right</button></div>
+    </div>
+
+    <div class="fre-step" id="fre-step-4">
+      <div class="fre-progress"><div class="fre-progress-dot done"></div><div class="fre-progress-dot done"></div><div class="fre-progress-dot done"></div><div class="fre-progress-dot current"></div></div>
+      <div class="fre-eyebrow">YOUR <em class="x-hi">X</em> IS DEFINED</div>
+      <div class="fre-title">ma<em class="x-hi">X</em>. Studio is live.</div>
+      <p class="fre-sub">I know who you are and what you are working on. That is your X. From here, I learn, observe, dispatch, and brief -- so you can focus on decisions.</p>
+      <div style="padding:20px;border-radius:14px;border:1px solid var(--border);background:var(--surface);margin-bottom:24px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div style="width:40px;height:40px;border-radius:11px;background:var(--c-master-bg);display:flex;align-items:center;justify-content:center;font-weight:800;font-family:var(--font-display);font-size:0.85rem;color:var(--c-master)">M</div>
+          <div><div style="font-family:var(--font-display);font-weight:700;font-size:0.95rem">ma<em class="x-hi">X</em>. Studio</div><div style="font-size:0.72rem;color:var(--text-secondary)">Your X, defined</div></div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px"><span class="tag">Daily Briefings</span><span class="tag">TODO Tracking</span><span class="tag">Cross-project Insights</span><span class="tag">Agent Orchestration</span></div>
+      </div>
+      <button class="btn btn-p" onclick="goToApp()">Start working</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== SCREEN 2: APP SHELL ===== -->
+<div class="screen screen-app" id="screen-app">
+  <div class="topbar">
+    <div class="topbar-logo">ma<span class="x-hi">X</span><span class="dot"></span>Studio</div>
+    <div class="topbar-right">
+      <span class="topbar-screen-label" id="topbar-label">Master Agent</span>
+      <div class="topbar-avatar">TC</div>
+    </div>
+  </div>
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Master</div>
+      <div class="sidebar-item active" onclick="switchPanel('master')" id="sb-master">
+        <div class="sidebar-icon" style="background:var(--c-master-bg);color:var(--c-master)">M</div>
+        <div class="sidebar-item-text"><h4>ma<em class="x-hi">X</em>. Studio</h4><p>Your central command</p></div>
+      </div>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Projects</div>
+      <div class="sidebar-item" onclick="switchPanel('project-a')" id="sb-project-a">
+        <div class="sidebar-icon" style="background:var(--c-project-a-bg);color:var(--c-project-a)">EM</div>
+        <div class="sidebar-item-text"><h4>Edge Mobile</h4><p>NTP, iOS expansion</p></div>
+        <div class="sidebar-badge" style="background:oklch(0.2 0.06 22);color:var(--c-todo)">2</div>
+      </div>
+      <div class="sidebar-item" onclick="switchPanel('project-b')" id="sb-project-b">
+        <div class="sidebar-icon" style="background:var(--c-project-b-bg);color:var(--c-project-b)">PS</div>
+        <div class="sidebar-item-text"><h4>PM Studio</h4><p>V3 roadmap, skills</p></div>
+      </div>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Views</div>
+      <div class="sidebar-item" onclick="switchPanel('briefing')" id="sb-briefing">
+        <div class="sidebar-icon" style="background:var(--c-briefing-bg);color:var(--c-briefing)">B</div>
+        <div class="sidebar-item-text"><h4>Daily Briefing</h4><p>Today's digest</p></div>
+        <div class="sidebar-badge" style="background:oklch(0.2 0.06 68);color:var(--c-briefing)">5</div>
+      </div>
+      <div class="sidebar-item" onclick="switchPanel('todos')" id="sb-todos">
+        <div class="sidebar-icon" style="background:var(--c-todo-bg);color:var(--c-todo)">T</div>
+        <div class="sidebar-item-text"><h4>TODOs</h4><p>Unified task view</p></div>
+        <div class="sidebar-badge" style="background:oklch(0.2 0.06 22);color:var(--c-todo)">7</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <!-- Master Chat -->
+    <div class="panel active" id="panel-master">
+      <div class="chat-panel">
+        <div class="chat-header">
+          <div class="chat-header-icon" style="background:var(--c-master-bg);color:var(--c-master)">M</div>
+          <div class="chat-header-info"><h3>Master Agent</h3><p>Understands intent, dispatches work, reports back</p></div>
+        </div>
+        <div class="chat-body">
+          <div class="chat-msg a">
+            <div class="msg-label" style="color:var(--c-master)">Master Agent</div>
+            Good morning Tracy. Here's what needs your attention today:
+            <div class="dc">
+              <h5 style="color:var(--c-briefing)">3 items need your decision</h5>
+              <div class="dr"><span class="dp" style="background:var(--c-project-a)"></span><span>Edge NTP spec review from Sean</span><span class="da">&rarr;</span><span style="color:var(--text-secondary)">Edge Mobile agent</span><span class="ds p0">P0</span></div>
+              <div class="dr"><span class="dp" style="background:var(--c-project-b)"></span><span>V3 eval framework design decision</span><span class="da">&rarr;</span><span style="color:var(--text-secondary)">PM Studio agent</span><span class="ds p1">P1</span></div>
+              <div class="dr"><span class="dp" style="background:var(--c-master)"></span><span>1:1 prep for Qi Zhang</span><span class="da">&rarr;</span><span style="color:var(--text-secondary)">Master (cross-cutting)</span><span class="ds p1">P1</span></div>
+            </div>
+          </div>
+          <div class="chat-msg u">Let's start with the NTP spec. What did Sean say?</div>
+          <div class="chat-msg a">
+            <div class="msg-label" style="color:var(--c-master)">Master Agent</div>
+            Routing to Edge Mobile agent for context. One moment...
+            <div class="dc" style="border-color:oklch(0.3 0.08 155 / 0.3)">
+              <h5 style="color:var(--c-project-a)">Dispatched to Edge Mobile</h5>
+              <div class="dr"><span class="dp" style="background:var(--c-project-a)"></span><span>Retrieving Sean's spec comments + your last NTP decisions</span><span class="ds" style="background:oklch(0.2 0.06 155);color:var(--c-project-a)">Working</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-bar"><input class="chat-input" placeholder="Talk to Master Agent..."><button class="chat-send">&uarr;</button></div>
+      </div>
+    </div>
+
+
+    <!-- Edge Mobile -->
+    <div class="panel" id="panel-project-a">
+      <div class="chat-panel">
+        <div class="chat-header">
+          <div class="chat-header-icon" style="background:var(--c-project-a-bg);color:var(--c-project-a)">EM</div>
+          <div class="chat-header-info"><h3>Edge Mobile Agent</h3><p>NTP experience, iOS expansion, stakeholder tracking</p></div>
+        </div>
+        <div class="chat-body">
+          <div class="chat-msg a">
+            <div class="msg-label" style="color:var(--c-project-a)">Edge Mobile Agent</div>
+            Sean reviewed the NTP spec yesterday. His key feedback:
+            <div style="margin-top:8px;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface-alt);font-size:0.82rem;line-height:1.55">
+              <strong>1.</strong> Feed ranking needs A/B test plan before shipping<br>
+              <strong>2.</strong> iOS widget timeline is too aggressive -- suggests 2-week buffer<br>
+              <strong>3.</strong> Accessibility audit missing from the spec
+            </div>
+            <p style="margin-top:10px;font-size:0.82rem;color:var(--text-secondary)">I've drafted a response addressing points 1 and 3. Point 2 requires your call on timeline.</p>
+          </div>
+          <div class="chat-msg u">Agree on the buffer. Update the timeline and send Sean my response.</div>
+          <div class="chat-msg a">
+            <div class="msg-label" style="color:var(--c-project-a)">Edge Mobile Agent</div>
+            Done. Timeline updated. Response sent via Teams. Marking this TODO as resolved.
+            <div class="dc" style="border-color:oklch(0.3 0.08 155 / 0.3)">
+              <h5 style="color:var(--c-project-a)">Status update sent to Master</h5>
+              <div class="dr"><span class="dp" style="background:var(--c-project-a)"></span><span>NTP spec review: resolved</span><span class="ds" style="background:oklch(0.2 0.06 155);color:var(--c-project-a)">Done</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-bar"><input class="chat-input" placeholder="Talk to Edge Mobile agent..."><button class="chat-send">&uarr;</button></div>
+      </div>
+    </div>
+
+    <!-- PM Studio -->
+    <div class="panel" id="panel-project-b">
+      <div class="chat-panel">
+        <div class="chat-header">
+          <div class="chat-header-icon" style="background:var(--c-project-b-bg);color:var(--c-project-b)">PS</div>
+          <div class="chat-header-info"><h3>PM Studio Agent</h3><p>V3 roadmap, skills development, evals framework</p></div>
+        </div>
+        <div class="chat-body">
+          <div class="chat-msg a">
+            <div class="msg-label" style="color:var(--c-project-b)">PM Studio Agent</div>
+            V3 sprint status: 4 of 6 deliverables on track.
+            <div style="margin-top:8px;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface-alt);font-size:0.82rem;line-height:1.7">
+              <span style="color:var(--c-project-a)">&#10003;</span> Native TODO Support -- in review<br>
+              <span style="color:var(--c-project-a)">&#10003;</span> Server-Side Sync -- shipped<br>
+              <span style="color:var(--c-project-a)">&#10003;</span> Perf improvements -- in progress<br>
+              <span style="color:var(--c-project-a)">&#10003;</span> Skill trigger fix -- shipped<br>
+              <span style="color:var(--c-briefing)">&#9679;</span> Evals Framework -- <strong>needs design decision</strong><br>
+              <span style="color:var(--c-todo)">&#9679;</span> Document Sync -- blocked on API access
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-bar"><input class="chat-input" placeholder="Talk to PM Studio agent..."><button class="chat-send">&uarr;</button></div>
+      </div>
+    </div>
+
+    <!-- Briefing -->
+    <div class="panel" id="panel-briefing">
+      <div class="scroll-panel">
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);font-weight:600;margin-bottom:6px">Monday, April 28, 2026</div>
+        <div class="panel-title">Daily Briefing</div>
+        <div class="panel-sub">Composed by Master Agent from all project status objects.</div>
+        <div class="section">
+          <div class="section-label"><span style="color:var(--c-todo)">&#9679;</span> Decisions needed</div>
+          <div class="card"><h4><span class="pt p0">P0</span> NTP spec review -- Sean's feedback</h4><p>3 items from Sean Lyndersay. Feed ranking A/B plan, iOS timeline buffer, accessibility audit. Draft response ready.</p><div class="src">Edge Mobile Agent &middot; Teams &middot; 2h ago</div></div>
+          <div class="card"><h4><span class="pt p1">P1</span> Evals framework: metric-based or LLM-as-judge?</h4><p>PM Studio V3 needs a design decision. Tech lead leans toward hybrid. Sign-off needed before sprint planning.</p><div class="src">PM Studio Agent &middot; Slack #pm-studio-dev &middot; Yesterday</div></div>
+        </div>
+        <div class="section">
+          <div class="section-label"><span style="color:var(--c-briefing)">&#9679;</span> Replies drafted</div>
+          <div class="card"><h4><span class="pt p1">P1</span> Response to Qi Zhang's reorg question</h4><p>Headcount allocation post-reorg. Draft references planning doc and your stated priorities. Review and send.</p><div class="src">Master Agent (cross-cutting) &middot; Email &middot; Yesterday 6pm</div></div>
+        </div>
+        <div class="section">
+          <div class="section-label"><span style="color:var(--c-project-a)">&#9679;</span> Today's meetings</div>
+          <div class="card"><h4>10:00 AM -- Edge Mobile standup</h4><p>Talking points: iOS timeline update, feed ranking A/B test plan.</p></div>
+          <div class="card"><h4>2:00 PM -- 1:1 with Qi Zhang</h4><p>Agenda: reorg headcount, PM Studio V3 demo scheduling, career check-in.</p></div>
+          <div class="card"><h4>4:00 PM -- PM Studio sprint planning</h4><p>Key topic: evals framework design decision.</p></div>
+        </div>
+        <div class="section">
+          <div class="section-label"><span style="color:var(--text-tertiary)">&#9679;</span> FYI</div>
+          <div class="card"><h4><span class="pt p2">FYI</span> Employee benefit reclaim deadline</h4><p>Zhongyiren insurance reimbursement deadline this Friday.</p></div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- TODOs -->
+    <div class="panel" id="panel-todos">
+      <div class="scroll-panel">
+        <div class="panel-title">TODOs</div>
+        <div class="panel-sub">Unified across all projects. Tracked by Master Agent.</div>
+        <div class="section">
+          <div class="section-label">Overdue</div>
+          <div class="todo-item"><div class="todo-check"></div><div class="todo-text">Reply to Sean's NTP spec review</div><div class="todo-meta"><span class="todo-tag" style="background:var(--c-project-a-bg);color:var(--c-project-a)">Edge Mobile</span><span class="pt p0">P0</span></div></div>
+          <div class="todo-item"><div class="todo-check"></div><div class="todo-text">Submit benefit reclaim form</div><div class="todo-meta"><span class="todo-tag" style="background:rgba(255,255,255,0.06);color:var(--text-secondary)">Personal</span><span class="pt p1">P1</span></div></div>
+        </div>
+        <div class="section">
+          <div class="section-label">Due today</div>
+          <div class="todo-item"><div class="todo-check"></div><div class="todo-text">Decide on evals framework approach (metric vs LLM-as-judge)</div><div class="todo-meta"><span class="todo-tag" style="background:var(--c-project-b-bg);color:var(--c-project-b)">PM Studio</span><span class="pt p1">P1</span></div></div>
+          <div class="todo-item"><div class="todo-check"></div><div class="todo-text">Prep 1:1 agenda for Qi Zhang</div><div class="todo-meta"><span class="todo-tag" style="background:var(--c-master-bg);color:var(--c-master)">Cross-cutting</span><span class="pt p1">P1</span></div></div>
+        </div>
+        <div class="section">
+          <div class="section-label">This week</div>
+          <div class="todo-item"><div class="todo-check"></div><div class="todo-text">Draft iOS expansion one-pager for leadership review</div><div class="todo-meta"><span class="todo-tag" style="background:var(--c-project-a-bg);color:var(--c-project-a)">Edge Mobile</span></div></div>
+          <div class="todo-item"><div class="todo-check"></div><div class="todo-text">Review V3 skill trigger fix PR</div><div class="todo-meta"><span class="todo-tag" style="background:var(--c-project-b-bg);color:var(--c-project-b)">PM Studio</span></div></div>
+          <div class="todo-item"><div class="todo-check"></div><div class="todo-text">Schedule PM Studio V3 demo with leadership</div><div class="todo-meta"><span class="todo-tag" style="background:var(--c-project-b-bg);color:var(--c-project-b)">PM Studio</span></div></div>
+        </div>
+        <div class="section">
+          <div class="section-label">Completed recently</div>
+          <div class="todo-item done"><div class="todo-check"></div><div class="todo-text">Ship server-side sync for PM Studio</div><div class="todo-meta"><span class="todo-tag" style="background:var(--c-project-b-bg);color:var(--c-project-b)">PM Studio</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<script>
+function goTo(id,btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+function freNext(n){
+  document.querySelectorAll('.fre-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('fre-step-'+n).classList.add('active');
+}
+function connectSource(el,type){
+  el.classList.add('connected');
+  el.querySelector('.fre-source-status').textContent='Connected';
+  if(type==='teams')document.getElementById('value-flash').classList.add('show');
+}
+function goToApp(){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});document.getElementById('screen-app').classList.add('active');}
+function sw(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
+  var sb=document.getElementById('sb-'+id);if(sb)sb.classList.add('active');
+  var labels={master:'Master Agent','project-a':'Edge Mobile Agent','project-b':'PM Studio Agent',briefing:'Daily Briefing',todos:'TODOs',agents:'Agent Orchestration'};
+  document.getElementById('topbar-label').textContent=labels[id]||'';
+}
+function switchPanel(id){sw(id);}
+document.addEventListener('click',function(e){
+  var c=e.target.closest('.todo-check');
+  if(c)c.closest('.todo-item').classList.toggle('done');
+});
+</script>
+</body>
+</html>
+
