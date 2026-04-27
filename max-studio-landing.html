@@ -789,6 +789,7 @@
 <script>
   // X. rotation in hero headline
   const roles = [
+    { html: 'ma<span class="x-hi" style="font-size:inherit">X</span>.' },
     { text: 'PM.', color: 'var(--c-pm)' },
     { text: 'Eng.', color: 'var(--c-eng)' },
     { text: 'Design.', color: 'var(--c-design)' },
@@ -796,7 +797,6 @@
     { text: 'HR.', color: 'var(--c-hr)' },
     { text: 'Creator.', color: 'var(--c-creator)' },
     { text: 'Research.', color: 'var(--c-research)' },
-    { html: 'ma<span class="x-hi" style="font-size:inherit">X</span>.' },
   ];
   const rotateEl = document.getElementById('xRotate');
   roles.forEach((r, i) => {
@@ -811,12 +811,15 @@
     rotateEl.appendChild(span);
   });
   let current = 0;
-  setInterval(() => {
-    const words = rotateEl.querySelectorAll('.x-rotate-word');
-    words[current].classList.remove('active');
-    current = (current + 1) % words.length;
-    words[current].classList.add('active');
-  }, 2000);
+  // Hold on maX. for 3s, then start cycling
+  setTimeout(() => {
+    setInterval(() => {
+      const words = rotateEl.querySelectorAll('.x-rotate-word');
+      words[current].classList.remove('active');
+      current = (current + 1) % words.length;
+      words[current].classList.add('active');
+    }, 2000);
+  }, 3000);
 
   // Scroll reveal
   const revealObs = new IntersectionObserver((entries) => {
