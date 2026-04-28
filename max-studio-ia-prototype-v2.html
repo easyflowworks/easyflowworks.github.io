@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>MaX. Studio — IA Prototype v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#08080a;--surface:#121216;--surface-hover:#1a1a20;--surface-alt:#0e0e12;--border:#252530;--border-light:#303040;--text-primary:#f0eff2;--text-secondary:#888790;--text-tertiary:#555460;--c-master:oklch(0.72 0.17 275);--c-master-bg:oklch(0.2 0.06 275);--c-pa:oklch(0.72 0.17 155);--c-pa-bg:oklch(0.2 0.06 155);--c-pb:oklch(0.72 0.17 338);--c-pb-bg:oklch(0.2 0.06 338);--c-brief:oklch(0.72 0.17 68);--c-brief-bg:oklch(0.2 0.06 68);--c-todo:oklch(0.72 0.17 22);--c-todo-bg:oklch(0.2 0.06 22);--c-eng:oklch(0.72 0.17 155);--fd:'Bricolage Grotesque',sans-serif;--fb:'Figtree',sans-serif;--sbw:260px;--safe-b:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{overflow:hidden;height:100%;-webkit-text-size-adjust:100%;touch-action:manipulation}
+body{background:var(--bg);color:var(--text-primary);font-family:var(--fb);line-height:1.6;-webkit-font-smoothing:antialiased;overflow:hidden;height:100%;position:fixed;width:100%;overscroll-behavior:none}
+.x-hi{font-style:normal;color:var(--c-eng);animation:xc 5s ease-in-out infinite}
+@keyframes xc{0%,100%{color:var(--c-eng)}14%{color:var(--c-master)}28%{color:var(--c-pb)}42%{color:var(--c-brief)}56%{color:var(--c-todo)}70%{color:oklch(0.72 0.17 205)}84%{color:oklch(0.72 0.17 118)}}
+
+/* === WELCOME SCREEN === */
+.welcome{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity 0.8s ease,transform 0.8s ease}
+.welcome.hide{opacity:0;transform:scale(1.1);pointer-events:none}
+.welcome-logo{font-family:var(--fd);font-weight:800;font-size:clamp(2.5rem,8vw,4rem);letter-spacing:-0.06em;opacity:0;animation:welcomeFade 1s 0.3s ease forwards}
+.welcome-logo .wdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px;vertical-align:middle;background:var(--c-eng);animation:xc 5s ease-in-out infinite}
+.welcome-sub{font-size:0.9rem;color:var(--text-tertiary);opacity:0;animation:welcomeFade 1s 0.8s ease forwards;margin-top:8px;letter-spacing:0.1em}
+.welcome-line{width:60px;height:2px;background:var(--c-master);margin-top:20px;opacity:0;animation:welcomeLine 1.2s 1.2s ease forwards}
+@keyframes welcomeFade{to{opacity:1}}
+@keyframes welcomeLine{0%{opacity:0;width:0}100%{opacity:1;width:60px}}
+
+/* === SCREENS === */
+.screen{display:none;height:100%;width:100%;position:absolute;top:0;left:0;overflow:hidden}
+.screen.active{display:flex}
+.screen-fre{flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-top:20px}
+.screen-app{flex-direction:row}
+
+/* === TOPBAR === */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:rgba(8,8,10,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(37,37,48,0.5)}
+.topbar-logo{font-family:var(--fd);font-weight:800;font-size:1.05rem;letter-spacing:-0.04em}
+.topbar-logo .dot{display:inline-block;width:5px;height:5px;border-radius:50%;margin:0 2px;vertical-align:middle;background:var(--c-eng);animation:xc 5s ease-in-out infinite}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-avatar{width:26px;height:26px;border-radius:7px;background:var(--c-master-bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:600;color:var(--c-master)}
+.topbar-label{font-size:0.7rem;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.08em;font-weight:500}
+
+/* === FRE === */
+.fre-wrap{max-width:540px;width:100%;padding:60px 24px 120px;position:relative;z-index:2}
+.fre-wrap::before{content:'';position:absolute;top:-30%;left:50%;transform:translateX(-50%);width:500px;height:400px;background:radial-gradient(ellipse 220px 180px at 40% 40%,oklch(0.25 0.1 275/0.2),transparent),radial-gradient(ellipse 180px 160px at 65% 50%,oklch(0.25 0.1 155/0.15),transparent);filter:blur(60px);pointer-events:none;z-index:-1}
+.fre-step{display:none;animation:fu 0.5s cubic-bezier(0.16,1,0.3,1) forwards}
+.fre-step.active{display:block}
+@keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fre-prog{display:flex;gap:5px;margin-bottom:24px}
+.fre-dot{width:28px;height:3px;border-radius:2px;background:var(--border);transition:background 0.3s}
+.fre-dot.done{background:var(--c-master)}
+.fre-dot.now{background:var(--text-primary)}
+.fre-eye{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.25em;color:var(--text-tertiary);font-weight:300;margin-bottom:14px}
+.fre-h{font-family:var(--fd);font-weight:800;font-size:clamp(1.5rem,5vw,2.2rem);letter-spacing:-0.04em;line-height:1.15;margin-bottom:10px}
+.fre-p{color:var(--text-secondary);font-size:0.9rem;margin-bottom:28px;max-width:42ch}
+
+/* Source cards */
+.src-list{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.src-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:11px;border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:all 0.3s;-webkit-tap-highlight-color:transparent}
+.src-card:active{transform:scale(0.98)}
+.src-card.on{border-color:var(--c-pa)}
+.src-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:600;background:var(--surface-hover);flex-shrink:0}
+.src-card h4{font-family:var(--fd);font-weight:600;font-size:0.82rem}
+.src-card p{font-size:0.72rem;color:var(--text-secondary)}
+.src-st{margin-left:auto;font-size:0.68rem;font-weight:600;padding:3px 8px;border-radius:5px;background:rgba(255,255,255,0.04);color:var(--text-tertiary);flex-shrink:0}
+.src-card.on .src-st{background:oklch(0.2 0.06 155);color:var(--c-pa)}
+.val-flash{margin-top:16px;padding:12px 14px;border-radius:10px;border:1px solid oklch(0.3 0.08 155/0.3);background:oklch(0.12 0.03 155/0.3);font-size:0.8rem;color:var(--c-pa);display:none;animation:fu 0.5s ease}
+.val-flash.show{display:block}
+
+/* FRE chat */
+.fc{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.fc-msg{max-width:90%;padding:10px 14px;border-radius:12px;font-size:0.84rem;line-height:1.45}
+.fc-msg.ag{align-self:flex-start;background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:3px}
+.fc-msg.us{align-self:flex-end;background:var(--c-master-bg);border:1px solid oklch(0.3 0.08 275/0.3);border-bottom-right-radius:3px;color:oklch(0.9 0.05 275)}
+.fc-msg .al{font-size:0.62rem;font-weight:600;color:var(--c-master);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;margin:3px;border:1px solid var(--border);background:var(--surface-hover);font-size:0.78rem;font-weight:500}
+.pip{width:7px;height:7px;border-radius:50%}
+
+/* Bootstrap briefing */
+.bb{padding:16px;border-radius:12px;border:1px solid oklch(0.3 0.08 68/0.3);background:oklch(0.12 0.03 68/0.15);margin-bottom:20px}
+.bb h4{font-family:var(--fd);font-weight:700;font-size:0.85rem;color:var(--c-brief);margin-bottom:10px}
+.bb-item{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:0.78rem}
+.bb-item .bp{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border-radius:9px;border:none;font-family:var(--fd);font-weight:700;font-size:0.85rem;cursor:pointer;transition:all 0.2s;-webkit-tap-highlight-color:transparent}
+.btn-p{background:var(--text-primary);color:var(--bg)}
+.btn-p:active{transform:scale(0.97)}
+.btn-g{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
+.tag{font-size:0.68rem;padding:3px 8px;border-radius:5px;background:rgba(255,255,255,0.04);color:var(--text-secondary)}
+</style>
+<style>
+/* === SIDEBAR === */
+.sidebar{width:var(--sbw);min-width:var(--sbw);height:calc(100% - 48px);margin-top:48px;background:var(--surface-alt);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px 10px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.sb-sec{margin-bottom:16px}
+.sb-lbl{font-size:0.62rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);font-weight:600;padding:0 8px;margin-bottom:5px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:9px;cursor:pointer;transition:background 0.15s;margin-bottom:2px;-webkit-tap-highlight-color:transparent}
+.sb-item:hover,.sb-item.active{background:var(--surface-hover)}
+.sb-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;font-family:var(--fd);flex-shrink:0}
+.sb-item h4{font-family:var(--fd);font-weight:600;font-size:0.78rem;line-height:1.2}
+.sb-item p{font-size:0.65rem;color:var(--text-tertiary)}
+.sb-badge{margin-left:auto;min-width:16px;height:16px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.55rem;font-weight:700;flex-shrink:0}
+.sb-div{height:1px;background:var(--border);margin:6px 6px}
+.st-dot{width:7px;height:7px;border-radius:50%;margin-left:auto;flex-shrink:0}
+.st-dot.on{background:var(--c-pa);animation:pulse 1.5s ease-in-out infinite}
+.st-dot.off{background:var(--text-tertiary)}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 oklch(0.72 0.17 155/0.3)}50%{opacity:0.7;box-shadow:0 0 0 4px oklch(0.72 0.17 155/0)}}
+
+/* === MAIN CONTENT === */
+.main{flex:1;height:calc(100% - 48px);margin-top:48px;display:flex;flex-direction:column;overflow:hidden}
+
+/* Chat */
+.chat{flex:1;display:flex;flex-direction:column;min-height:0}
+.ch{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ch-ico{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;font-family:var(--fd);flex-shrink:0}
+.ch h3{font-family:var(--fd);font-weight:700;font-size:0.9rem;letter-spacing:-0.02em}
+.ch p{font-size:0.68rem;color:var(--text-secondary)}
+.cb{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;min-height:0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.cm{max-width:78%;padding:10px 14px;border-radius:13px;font-size:0.82rem;line-height:1.5}
+.cm.a{align-self:flex-start;background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:3px}
+.cm.u{align-self:flex-end;background:var(--c-master-bg);border:1px solid oklch(0.3 0.08 275/0.3);border-bottom-right-radius:3px}
+.ml{font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px}
+/* Handoff */
+.ho{margin:6px 0;padding:8px 12px;border-radius:9px;display:flex;align-items:center;gap:8px;font-size:0.74rem;animation:fu 0.4s ease}
+.ho-ico{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.55rem;font-weight:800;font-family:var(--fd);flex-shrink:0}
+.ho-arr{color:var(--text-tertiary);font-size:0.65rem}
+.ho-st{margin-left:auto;font-size:0.62rem;padding:2px 7px;border-radius:4px;font-weight:600}
+/* Dispatch card */
+.dc{padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface-alt);margin-top:6px;font-size:0.76rem}
+.dc h5{font-family:var(--fd);font-weight:700;font-size:0.74rem;margin-bottom:6px}
+.dc .dr{display:flex;align-items:center;gap:6px;padding:4px 0}
+.dc .dp{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dc .da{color:var(--text-tertiary);font-size:0.65rem}
+.dc .ds{margin-left:auto;font-size:0.62rem;padding:2px 6px;border-radius:4px;font-weight:600}
+.ci{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-shrink:0}
+.ci input{flex:1;padding:9px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text-primary);font-family:var(--fb);font-size:0.84rem;outline:none;-webkit-appearance:none}
+.ci input:focus{border-color:var(--c-master)}
+.ci input::placeholder{color:var(--text-tertiary)}
+.ci button{width:34px;height:34px;border-radius:9px;border:none;background:var(--text-primary);color:var(--bg);font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* Briefing + TODO */
+.sp{flex:1;overflow-y:auto;padding:24px 20px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.pt-h{font-family:var(--fd);font-weight:800;font-size:1.35rem;letter-spacing:-0.03em;margin-bottom:4px}
+.pt-s{font-size:0.8rem;color:var(--text-secondary);margin-bottom:20px}
+.sec{margin-bottom:20px}
+.sec-l{font-size:0.64rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.cd{padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface);margin-bottom:5px;cursor:pointer;transition:background 0.15s;-webkit-tap-highlight-color:transparent}
+.cd:active{background:var(--surface-hover)}
+.cd h4{font-family:var(--fd);font-weight:600;font-size:0.82rem;margin-bottom:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cd p{font-size:0.74rem;color:var(--text-secondary);line-height:1.45}
+.cd .sr{margin-top:4px;font-size:0.64rem;color:var(--text-tertiary)}
+/* Hero card */
+.cd-hero{padding:14px 16px;border-radius:12px;border:1px solid oklch(0.3 0.1 22/0.4);background:oklch(0.12 0.04 22/0.2);margin-bottom:8px}
+.cd-hero h4{font-size:0.88rem;margin-bottom:4px}
+.cd-hero p{font-size:0.78rem}
+.qa{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.qa-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text-primary);font-size:0.72rem;font-weight:600;cursor:pointer;font-family:var(--fd);-webkit-tap-highlight-color:transparent}
+.qa-btn.pri{background:var(--c-todo);border-color:var(--c-todo);color:white}
+.ptag{font-size:0.58rem;font-weight:700;padding:2px 6px;border-radius:3px;white-space:nowrap}
+.p0{background:oklch(0.2 0.08 22);color:var(--c-todo)}
+.p1{background:oklch(0.2 0.06 68);color:var(--c-brief)}
+/* TODO items */
+.ti{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:9px;border:1px solid var(--border);background:var(--surface);margin-bottom:4px;transition:all 0.3s}
+.ti .ck{width:16px;height:16px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;margin-top:1px;cursor:pointer;transition:all 0.2s}
+.ti.done .ck{background:var(--c-pa);border-color:var(--c-pa)}
+.ti.done .tt{text-decoration:line-through;color:var(--text-tertiary)}
+.ti.jd{animation:td 0.4s ease}
+@keyframes td{50%{transform:scale(0.97);opacity:0.6}}
+.tt{font-size:0.78rem;line-height:1.35}
+.tm{margin-left:auto;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.ttag{font-size:0.6rem;font-weight:600;padding:2px 7px;border-radius:4px;white-space:nowrap}
+
+/* Panels */
+.pnl{display:none;flex:1;flex-direction:column;min-height:0;overflow:hidden}
+.pnl.active{display:flex}
+
+/* === MOBILE TAB BAR === */
+
+.ham{display:none;width:36px;height:36px;border:none;background:none;cursor:pointer;padding:8px;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.ham span{display:block;width:18px;height:2px;background:var(--text-secondary);margin:3px auto;border-radius:1px;transition:all 0.3s}
+.ham.open span:nth-child(1){transform:rotate(45deg) translate(4px,4px)}
+.ham.open span:nth-child(2){opacity:0}
+.ham.open span:nth-child(3){transform:rotate(-45deg) translate(4px,-4px)}
+.sb-overlay{display:none;position:fixed;top:48px;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:89;-webkit-tap-highlight-color:transparent}
+.sb-overlay.show{display:block}
+@media(max-width:768px){.sidebar{position:fixed!important;top:48px;left:0;bottom:0;z-index:90;transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.16,1,0.3,1);width:260px!important;min-width:260px!important;display:flex!important}.sidebar.open{transform:translateX(0)}.ham{display:flex;flex-direction:column;justify-content:center}:root{--sbw:0}.main{height:calc(100% - 48px)!important}.topbar-label{display:none}.cb{padding:14px}.cm{max-width:92%}.sp{padding:18px 14px}.pt-h{font-size:1.15rem}.fre-wrap{padding:50px 18px 100px}.qa{flex-direction:column}}
+
+</head>
+</style>
+
+<body>
+
+
+<!-- WELCOME -->
+<div class="welcome" id="welcome">
+  <div class="welcome-logo">Ma<span class="x-hi">X</span><span class="wdot"></span>Studio</div>
+  <div class="welcome-sub">YOUR AI OPERATING SYSTEM</div>
+  <div class="welcome-line"></div>
+</div>
+
+<!-- FRE -->
+<div class="screen screen-fre active" id="screen-fre">
+<div class="fre-wrap">
+  <div class="fre-step active" id="fs-1">
+    <div class="fre-prog"><div class="fre-dot now"></div><div class="fre-dot"></div><div class="fre-dot"></div></div>
+    <div class="fre-eye">WELCOME TO <span style="text-transform:none">Ma</span><em class="x-hi">X</em>. STUDIO</div>
+    <div class="fre-h">Let's set you up.<br>It takes 2 minutes.</div>
+    <p class="fre-p">Connect your tools and I'll start working for you immediately.</p>
+    <div class="src-list">
+      <div class="src-card" onclick="conn(this,'teams')"><div class="src-ico">T</div><div><h4>Microsoft Teams</h4><p>Messages, channels, meetings</p></div><span class="src-st">Connect</span></div>
+      <div class="src-card" onclick="conn(this,'outlook')"><div class="src-ico">O</div><div><h4>Outlook</h4><p>Emails, calendar, contacts</p></div><span class="src-st">Connect</span></div>
+      <div class="src-card" onclick="conn(this,'slack')"><div class="src-ico">S</div><div><h4>Slack</h4><p>Workspace messages, threads</p></div><span class="src-st">Connect</span></div>
+    </div>
+    <div class="val-flash" id="vf">12 unread Teams threads found. 3 need your reply today.</div>
+    <button class="btn btn-p" onclick="fre(2)">Continue</button>
+  </div>
+
+  <div class="fre-step" id="fs-2">
+    <div class="fre-prog"><div class="fre-dot done"></div><div class="fre-dot now"></div><div class="fre-dot"></div></div>
+    <div class="fre-eye">FINDING YOUR <em class="x-hi">X</em></div>
+    <div class="fre-h">Tell me about yourself.</div>
+    <p class="fre-p">Just talk naturally. I'll figure out the structure.</p>
+    <div class="fc">
+      <div class="fc-msg ag"><div class="al">Ma<em class="x-hi">X</em>. Studio</div>I see from your Teams that you're active in channels for "Edge Mobile" and "PM Studio". Who are you and what are you working on?</div>
+      <div class="fc-msg us">I'm Tracy Chen, Head of Product for Edge China. I lead Edge Mobile and also run PM Studio. I like direct, concise communication.</div>
+      <div class="fc-msg ag"><div class="al">Ma<em class="x-hi">X</em>. Studio</div>Got it, Tracy. Two workstreams, different stakeholders. Direct and concise -- noted.</div>
+    </div>
+    <div style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);margin-bottom:18px">
+      <h4 style="font-family:var(--fd);font-weight:700;font-size:0.82rem;color:var(--c-master);margin-bottom:8px">2 workstreams identified</h4>
+      <div class="pill"><span class="pip" style="background:var(--c-pa)"></span>Edge Mobile</div>
+      <div class="pill"><span class="pip" style="background:var(--c-pb)"></span>PM Studio</div>
+    </div>
+    <div style="display:flex;gap:8px"><button class="btn btn-g" onclick="fre(1)">Back</button><button class="btn btn-p" onclick="fre(3)">Looks right</button></div>
+  </div>
+
+  <div class="fre-step" id="fs-3">
+    <div class="fre-prog"><div class="fre-dot done"></div><div class="fre-dot done"></div><div class="fre-dot now"></div></div>
+    <div class="fre-eye">YOUR <em class="x-hi">X</em> IS DEFINED</div>
+    <div class="fre-h">While we were setting up, I caught up on what you missed.</div>
+    <p class="fre-p">Here's what I found.</p>
+    <div class="bb">
+      <h4>Bootstrap Briefing</h4>
+      <div class="bb-item"><span class="bp" style="background:var(--c-todo)"></span><strong>P0</strong>&nbsp; Sean left 3 comments on the NTP spec. Draft response ready.</div>
+      <div class="bb-item"><span class="bp" style="background:var(--c-brief)"></span><strong>P1</strong>&nbsp; Evals framework needs your design decision.</div>
+      <div class="bb-item"><span class="bp" style="background:var(--c-master)"></span><strong>P1</strong>&nbsp; Qi Zhang sent a reorg question. Draft reply ready.</div>
+      <div class="bb-item"><span class="bp" style="background:var(--c-pa)"></span><strong>FYI</strong>&nbsp; 3 meetings today. Talking points prepared.</div>
+    </div>
+    <div style="padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--surface);margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--c-master-bg);display:flex;align-items:center;justify-content:center;font-weight:800;font-family:var(--fd);font-size:0.8rem;color:var(--c-master)">M</div>
+        <div><div style="font-family:var(--fd);font-weight:700;font-size:0.88rem">Ma<em class="x-hi">X</em>. Studio</div><div style="font-size:0.68rem;color:var(--text-secondary)">Your X, defined</div></div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px"><span class="tag">Briefings</span><span class="tag">TODOs</span><span class="tag">Cross-project</span><span class="tag">Orchestration</span></div>
+    </div>
+    <button class="btn btn-p" onclick="go()">Start working</button>
+  </div>
+</div>
+</div>
+
+
+<!-- APP -->
+<div class="screen screen-app" id="screen-app">
+<div class="topbar"><button class="ham" id="ham" onclick="toggleSb()"><span></span><span></span><span></span></button><div class="topbar-logo">Ma<span class="x-hi">X</span><span class="dot"></span>Studio</div><div class="topbar-right"><span class="topbar-label" id="tl">Master Agent</span><div class="topbar-avatar">TC</div></div></div>
+<div class="sidebar">
+  <div class="sb-sec"><div class="sb-lbl">Master</div>
+    <div class="sb-item active" onclick="sw('master')" id="sb-master"><div class="sb-ico" style="background:var(--c-master-bg);color:var(--c-master)">M</div><div><h4>Ma<em class="x-hi">X</em>. Studio</h4><p>Central command</p></div></div>
+  </div><div class="sb-div"></div>
+  <div class="sb-sec"><div class="sb-lbl">Projects</div>
+    <div class="sb-item" onclick="sw('pa')" id="sb-pa"><div class="sb-ico" style="background:var(--c-pa-bg);color:var(--c-pa)">EM</div><div><h4>Edge Mobile</h4><p>NTP, iOS</p></div><div class="st-dot on"></div></div>
+    <div class="sb-item" onclick="sw('pb')" id="sb-pb"><div class="sb-ico" style="background:var(--c-pb-bg);color:var(--c-pb)">PS</div><div><h4>PM Studio</h4><p>V3 roadmap</p></div><div class="st-dot off"></div></div>
+  </div><div class="sb-div"></div>
+  <div class="sb-sec"><div class="sb-lbl">Views</div>
+    <div class="sb-item" onclick="sw('brief')" id="sb-brief"><div class="sb-ico" style="background:var(--c-brief-bg);color:var(--c-brief)">B</div><div><h4>Daily Briefing</h4><p>Today's digest</p></div><div class="sb-badge" style="background:oklch(0.2 0.06 68);color:var(--c-brief)">5</div></div>
+    <div class="sb-item" onclick="sw('todos')" id="sb-todos"><div class="sb-ico" style="background:var(--c-todo-bg);color:var(--c-todo)">T</div><div><h4>TODOs</h4><p>Unified tasks</p></div><div class="sb-badge" style="background:oklch(0.2 0.06 22);color:var(--c-todo)">7</div></div>
+  </div>
+</div>
+<div class="sb-overlay" id="sbOv" onclick="toggleSb()"></div>
+<div class="main">
+  <!-- Master -->
+  <div class="pnl active" id="pnl-master"><div class="chat">
+    <div class="ch"><div class="ch-ico" style="background:var(--c-master-bg);color:var(--c-master)">M</div><div><h3>Master Agent</h3><p>Understands intent, dispatches work, reports back</p></div></div>
+    <div class="cb">
+      <div class="cm a"><div class="ml" style="color:var(--c-master)">Master Agent</div>Good morning Tracy. Here's what needs your attention today:<div class="dc"><h5 style="color:var(--c-brief)">3 items need your decision</h5><div class="dr"><span class="dp" style="background:var(--c-pa)"></span>Edge NTP spec review from Sean<span class="da">&rarr;</span><span style="color:var(--text-secondary)">Edge Mobile</span><span class="ds p0">P0</span></div><div class="dr"><span class="dp" style="background:var(--c-pb)"></span>V3 eval framework decision<span class="da">&rarr;</span><span style="color:var(--text-secondary)">PM Studio</span><span class="ds p1">P1</span></div><div class="dr"><span class="dp" style="background:var(--c-master)"></span>1:1 prep for Qi Zhang<span class="da">&rarr;</span><span style="color:var(--text-secondary)">Master</span><span class="ds p1">P1</span></div></div></div>
+      <div class="cm u">Let's start with the NTP spec. What did Sean say?</div>
+      <div class="cm a"><div class="ml" style="color:var(--c-master)">Master Agent</div>Routing to Edge Mobile agent for context.</div>
+      <div class="ho" style="background:oklch(0.12 0.03 155/0.3);border:1px solid oklch(0.3 0.08 155/0.3)"><div class="ho-ico" style="background:var(--c-master-bg);color:var(--c-master)">M</div><span class="ho-arr">&rarr;</span><div class="ho-ico" style="background:var(--c-pa-bg);color:var(--c-pa)">EM</div><span style="color:var(--c-pa);font-weight:500">Dispatched to Edge Mobile</span><span class="ho-st" style="background:oklch(0.2 0.06 155);color:var(--c-pa)">Working</span></div>
+      <div class="cm a" style="border-color:oklch(0.3 0.08 155/0.3)"><div class="ml" style="color:var(--c-pa)">Edge Mobile Agent</div>Sean reviewed the NTP spec yesterday. Key feedback:<div style="margin-top:6px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface-alt);font-size:0.78rem;line-height:1.5"><strong>1.</strong> Feed ranking needs A/B plan<br><strong>2.</strong> iOS timeline too aggressive -- 2-week buffer<br><strong>3.</strong> Accessibility audit missing</div><p style="margin-top:8px;font-size:0.78rem;color:var(--text-secondary)">Draft ready for 1 and 3. Point 2 needs your call.</p></div>
+      <div class="cm u">Agree on the buffer. Update timeline and send Sean my response.</div>
+      <div class="cm a" style="border-color:oklch(0.3 0.08 155/0.3)"><div class="ml" style="color:var(--c-pa)">Edge Mobile Agent</div>Done. Timeline updated. Response sent via Teams.</div>
+      <div class="ho" style="background:oklch(0.12 0.03 155/0.15);border:1px solid oklch(0.3 0.05 155/0.2)"><div class="ho-ico" style="background:var(--c-pa-bg);color:var(--c-pa)">EM</div><span class="ho-arr">&rarr;</span><div class="ho-ico" style="background:var(--c-master-bg);color:var(--c-master)">M</div><span style="color:var(--text-secondary)">NTP spec review: resolved</span><span class="ho-st" style="background:oklch(0.2 0.06 155);color:var(--c-pa)">Done</span></div>
+    </div>
+    <div class="ci"><input placeholder="Talk to Master Agent..."><button>&uarr;</button></div>
+  </div></div>
+
+  <!-- Edge Mobile -->
+  <div class="pnl" id="pnl-pa"><div class="chat">
+    <div class="ch"><div class="ch-ico" style="background:var(--c-pa-bg);color:var(--c-pa)">EM</div><div><h3>Edge Mobile Agent</h3><p>NTP, iOS expansion, stakeholders</p></div></div>
+    <div class="cb">
+      <div class="cm a"><div class="ml" style="color:var(--c-pa)">Edge Mobile Agent</div>Sean reviewed the NTP spec. Key feedback:<div style="margin-top:6px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface-alt);font-size:0.78rem;line-height:1.5"><strong>1.</strong> Feed ranking A/B plan<br><strong>2.</strong> iOS timeline buffer<br><strong>3.</strong> Accessibility audit</div><p style="margin-top:8px;font-size:0.78rem;color:var(--text-secondary)">Draft ready for 1+3. Point 2 needs your call.</p></div>
+      <div class="cm u">Agree on buffer. Update and send.</div>
+      <div class="cm a"><div class="ml" style="color:var(--c-pa)">Edge Mobile Agent</div>Done. Timeline updated. Response sent.<div class="dc" style="border-color:oklch(0.3 0.08 155/0.3)"><h5 style="color:var(--c-pa)">Status sent to Master</h5><div class="dr"><span class="dp" style="background:var(--c-pa)"></span>NTP spec: resolved<span class="ds" style="background:oklch(0.2 0.06 155);color:var(--c-pa)">Done</span></div></div></div>
+    </div>
+    <div class="ci"><input placeholder="Talk to Edge Mobile..."><button>&uarr;</button></div>
+  </div></div>
+
+  <!-- PM Studio -->
+  <div class="pnl" id="pnl-pb"><div class="chat">
+    <div class="ch"><div class="ch-ico" style="background:var(--c-pb-bg);color:var(--c-pb)">PS</div><div><h3>PM Studio Agent</h3><p>V3 roadmap, skills, evals</p></div></div>
+    <div class="cb">
+      <div class="cm a"><div class="ml" style="color:var(--c-pb)">PM Studio Agent</div>V3 sprint: 4/6 on track.<div style="margin-top:6px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface-alt);font-size:0.78rem;line-height:1.6"><span style="color:var(--c-pa)">&#10003;</span> Native TODO -- in review<br><span style="color:var(--c-pa)">&#10003;</span> Server Sync -- shipped<br><span style="color:var(--c-pa)">&#10003;</span> Perf -- in progress<br><span style="color:var(--c-pa)">&#10003;</span> Skill fix -- shipped<br><span style="color:var(--c-brief)">&#9679;</span> Evals -- <strong>needs decision</strong><br><span style="color:var(--c-todo)">&#9679;</span> Doc Sync -- blocked</div></div>
+    </div>
+    <div class="ci"><input placeholder="Talk to PM Studio..."><button>&uarr;</button></div>
+  </div></div>
+
+
+  <!-- Briefing -->
+  <div class="pnl" id="pnl-brief"><div class="sp">
+    <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);font-weight:600;margin-bottom:4px">Monday, April 28, 2026</div>
+    <div class="pt-h">Daily Briefing</div>
+    <div class="pt-s">Composed by Master Agent from all project agents.</div>
+    <div class="sec"><div class="sec-l"><span style="color:var(--c-todo)">&#9679;</span> Start here</div>
+      <div class="cd-hero"><h4><span class="ptag p0">P0</span> NTP spec review -- Sean's feedback</h4><p>3 items from Sean. Feed ranking A/B, iOS timeline buffer, accessibility audit. Draft response ready.</p><div class="sr">Edge Mobile &middot; Teams &middot; 2h ago</div><div class="qa"><button class="qa-btn pri" onclick="this.textContent='Sent!';this.style.background='var(--c-pa)'">Send draft</button><button class="qa-btn" onclick="sw('pa')">View details</button></div></div>
+    </div>
+    <div class="sec"><div class="sec-l"><span style="color:var(--c-brief)">&#9679;</span> Decisions needed</div>
+      <div class="cd"><h4><span class="ptag p1">P1</span> Evals: metric-based or LLM-as-judge?</h4><p>PM Studio V3 needs design decision. Tech lead leans hybrid.</p><div class="sr">PM Studio &middot; Slack &middot; Yesterday</div></div>
+    </div>
+    <div class="sec"><div class="sec-l"><span style="color:var(--c-master)">&#9679;</span> Replies drafted</div>
+      <div class="cd"><h4><span class="ptag p1">P1</span> Response to Qi Zhang's reorg question</h4><p>Headcount allocation post-reorg. Draft references planning doc.</p><div class="sr">Master Agent &middot; Email &middot; Yesterday 6pm</div></div>
+    </div>
+    <div class="sec"><div class="sec-l"><span style="color:var(--c-pa)">&#9679;</span> Today's meetings</div>
+      <div class="cd"><h4>10:00 AM -- Edge Mobile standup</h4><p>Talking points: iOS timeline, feed ranking A/B.</p></div>
+      <div class="cd"><h4>2:00 PM -- 1:1 with Qi Zhang</h4><p>Agenda: reorg headcount, PM Studio demo, career check-in.</p></div>
+      <div class="cd"><h4>4:00 PM -- PM Studio sprint planning</h4><p>Key topic: evals framework decision.</p></div>
+    </div>
+    <div class="sec"><div class="sec-l"><span style="color:var(--text-tertiary)">&#9679;</span> FYI</div>
+      <div class="cd"><h4>Employee benefit reclaim deadline</h4><p>Zhongyiren insurance deadline this Friday.</p></div>
+    </div>
+  </div></div>
+
+  <!-- TODOs -->
+  <div class="pnl" id="pnl-todos"><div class="sp">
+    <div class="pt-h">TODOs</div>
+    <div class="pt-s">Unified across all projects. Tracked by Master Agent.</div>
+    <div class="sec"><div class="sec-l">Overdue</div>
+      <div class="ti"><div class="ck" onclick="ck(this)"></div><div class="tt">Reply to Sean's NTP spec review</div><div class="tm"><span class="ttag" style="background:var(--c-pa-bg);color:var(--c-pa)">Edge Mobile</span><span class="ptag p0">P0</span></div></div>
+      <div class="ti"><div class="ck" onclick="ck(this)"></div><div class="tt">Submit benefit reclaim form</div><div class="tm"><span class="ttag" style="background:rgba(255,255,255,0.06);color:var(--text-secondary)">Personal</span><span class="ptag p1">P1</span></div></div>
+    </div>
+    <div class="sec"><div class="sec-l">Due today</div>
+      <div class="ti"><div class="ck" onclick="ck(this)"></div><div class="tt">Decide on evals framework approach</div><div class="tm"><span class="ttag" style="background:var(--c-pb-bg);color:var(--c-pb)">PM Studio</span><span class="ptag p1">P1</span></div></div>
+      <div class="ti"><div class="ck" onclick="ck(this)"></div><div class="tt">Prep 1:1 agenda for Qi Zhang</div><div class="tm"><span class="ttag" style="background:var(--c-master-bg);color:var(--c-master)">Cross-cutting</span><span class="ptag p1">P1</span></div></div>
+    </div>
+    <div class="sec"><div class="sec-l">This week</div>
+      <div class="ti"><div class="ck" onclick="ck(this)"></div><div class="tt">Draft iOS expansion one-pager</div><div class="tm"><span class="ttag" style="background:var(--c-pa-bg);color:var(--c-pa)">Edge Mobile</span></div></div>
+      <div class="ti"><div class="ck" onclick="ck(this)"></div><div class="tt">Review V3 skill trigger fix PR</div><div class="tm"><span class="ttag" style="background:var(--c-pb-bg);color:var(--c-pb)">PM Studio</span></div></div>
+      <div class="ti"><div class="ck" onclick="ck(this)"></div><div class="tt">Schedule V3 demo with leadership</div><div class="tm"><span class="ttag" style="background:var(--c-pb-bg);color:var(--c-pb)">PM Studio</span></div></div>
+    </div>
+    <div class="sec"><div class="sec-l">Completed</div>
+      <div class="ti done"><div class="ck"></div><div class="tt">Ship server-side sync</div><div class="tm"><span class="ttag" style="background:var(--c-pb-bg);color:var(--c-pb)">PM Studio</span></div></div>
+    </div>
+  </div></div>
+</div>
+
+<!-- Mobile tabs -->
+</div>
+
+
+<script>
+// Welcome animation
+setTimeout(function(){document.getElementById('welcome').classList.add('hide')},3500);
+setTimeout(function(){document.getElementById('welcome').style.display='none'},4300);
+
+// FRE
+function fre(n){document.querySelectorAll('.fre-step').forEach(function(s){s.classList.remove('active')});document.getElementById('fs-'+n).classList.add('active')}
+function conn(el,t){el.classList.add('on');el.querySelector('.src-st').textContent='Connected';if(t==='teams')document.getElementById('vf').classList.add('show')}
+function go(){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});document.getElementById('screen-app').classList.add('active')}
+
+// Sidebar toggle
+function toggleSb(){var s=document.querySelector(".sidebar"),m=document.getElementById("ham"),o=document.getElementById("sbOv");s.classList.toggle("open");m.classList.toggle("open");o.classList.toggle("show")}
+function closeSb(){var s=document.querySelector(".sidebar"),m=document.getElementById("ham"),o=document.getElementById("sbOv");if(s)s.classList.remove("open");if(m)m.classList.remove("open");if(o)o.classList.remove("show")}
+
+
+// Panel switch
+function sw(id){closeSb();
+  document.querySelectorAll('.pnl').forEach(function(p){p.classList.remove('active')});
+  var el=document.getElementById('pnl-'+id);if(el)el.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(function(s){s.classList.remove('active')});
+  var sb=document.getElementById('sb-'+id);if(sb)sb.classList.add('active');
+  var tm={master:0,pa:1,pb:2,brief:3,todos:4};
+  var labels={master:'Master Agent',pa:'Edge Mobile',pb:'PM Studio',brief:'Daily Briefing',todos:'TODOs'};
+  var tl=document.getElementById('tl');if(tl)tl.textContent=labels[id]||'';
+}
+
+// TODO check
+function ck(el){var ti=el.closest('.ti');ti.classList.add('done','jd');setTimeout(function(){ti.classList.remove('jd')},400)}
+
+// Prevent bounce scroll on iOS
+document.addEventListener('touchmove',function(e){
+  var t=e.target;
+  while(t&&t!==document.body){
+    var s=window.getComputedStyle(t);
+    if(s.overflowY==='auto'||s.overflowY==='scroll'){
+      if(t.scrollHeight>t.clientHeight)return;
+    }
+    t=t.parentElement;
+  }
+  e.preventDefault();
+},{passive:false});
+</script>
+</body>
+</html>
+
